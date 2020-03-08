@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">CarOLX</string>
+    <string name="username_password">"  Username And Password"</string>
+    <string name="phone">"  Continue with Phone"</string>
+    <string name="google">"  Continue with Google"</string>
+    <string name="no_account">Don\'t have an account?</string>
+    <string name="signup">Sign Up</string>
+    <string name="hint_username">Username</string>
+    <string name="forget_password">Forget password?</string>
+    <string name="sign_in">sign in</string>
+    <string name="password">Password</string>
+    <string name="login">LOGIN</string>
+    <string name="user_email">Email</string>
+    <string name="next">NEXT</string>
+    <string name="have_account">Already Have an Account?</string>
+</resources>

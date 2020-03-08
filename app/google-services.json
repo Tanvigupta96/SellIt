@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "972661539851",
+    "firebase_url": "https://carolx-8b359.firebaseio.com",
+    "project_id": "carolx-8b359",
+    "storage_bucket": "carolx-8b359.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972661539851:android:0a36eb7a513f622ae8b30e",
+        "android_client_info": {
+          "package_name": "com.example.carolx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972661539851-h8q5o3nlgdppmc16957ik32bsstlc1no.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.carolx",
+            "certificate_hash": "e4c4344fe107b56bba7c41d600d2f668304904db"
+          }
+        },
+        {
+          "client_id": "972661539851-o26s1j22a0p8akch6lg1j05c8tj5p32q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAz8lrmjESHRNYvo-o9V5Qdb-GBDYg86-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972661539851-o26s1j22a0p8akch6lg1j05c8tj5p32q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

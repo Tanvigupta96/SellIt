@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/</item>
+        <item>@font/acme</item>
+        <item>@font/adamina</item>
+        <item>@font/alike</item>
+        <item>@font/allerta_stencil</item>
+        <item>@font/amiko</item>
+        <item>@font/andada</item>
+        <item>@font/arbutus</item>
+        <item>@font/archivo_black</item>
+        <item>@font/arima_madurai_thin</item>
+        <item>@font/average</item>
+        <item>@font/bangers</item>
+        <item>@font/buenard</item>
+        <item>@font/bungee</item>
+        <item>@font/capriola</item>
+        <item>@font/chonburi</item>
+        <item>@font/cutive</item>
+        <item>@font/fredoka_one</item>
+        <item>@font/galindo</item>
+        <item>@font/goblin_one</item>
+        <item>@font/judson</item>
+        <item>@font/miltonian_tattoo</item>
+        <item>@font/open_sans</item>
+        <item>@font/open_sans_light</item>
+        <item>@font/pacifico</item>
+        <item>@font/righteous</item>
+        <item>@font/roboto</item>
+        <item>@font/roboto_thin</item>
+        <item>@font/ubuntu</item>
+    </array>
+</resources>
