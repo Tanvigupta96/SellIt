@@ -9,11 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".VerifyPhoneActivity"></activity>
+        <activity android:name=".ProfileActivity" />
         <activity android:name=".ResetPasswordActivity" />
-        <activity android:name=".SignUpActivity">
-
-        </activity>
+        <activity android:name=".SignUpActivity"></activity>
         <activity android:name=".CallLoginActivity" />
         <activity android:name=".GmailLoginActivity" />
         <activity android:name=".LoginUPActivity" />
@@ -24,7 +23,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <meta-data
