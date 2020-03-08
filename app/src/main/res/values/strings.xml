@@ -13,4 +13,16 @@
     <string name="user_email">Email</string>
     <string name="next">NEXT</string>
     <string name="have_account">Already Have an Account?</string>
+    <string name="signin">SIGN IN</string>
+    <string name="notauser">Not a Registered User ?</string>
+    <string name="sigup">SIGN UP</string>
+    <string name="forgetPassword">Forget password?</string>
+    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="hint_email">Email</string>
+    <string name="btn_back">Back</string>
+
+
+
+
 </resources>

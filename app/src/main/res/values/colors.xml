@@ -15,7 +15,24 @@
     <color name="five">#a015b9</color>
     <color name="six">#df9132</color>
     <color name="seven">#66AEC2</color>
+    <color name="eight">#F35B57 </color>
+    <color name="nine">#3D3A4C</color>
+    <color name="ten">#F4EEEB</color>
+    <color name="eleven">#CE4547</color>
+    <color name="twelve">#BDBBBD</color>
+    <color name="thirteen">#D3B2B0</color>
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#383738</color>
+
+
+    <color name="grey_40">#999999</color>
+    <color name="grey_60">#666666</color>
+    <color name="grey_80">#37474F</color>
+    <color name="grey_90">#263238</color>
+
+    <color name="red_300">#E57373</color>
+    <color name="red_400">#EF5350</color>
+    <color name="yellow_transparant">#33c9ce6a</color>
+    <color name="black">#000</color>
 
 
 </resources>
