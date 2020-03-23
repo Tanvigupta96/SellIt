@@ -21,6 +21,8 @@
     <string name="btn_reset_password">Reset Password</string>
     <string name="hint_email">Email</string>
     <string name="btn_back">Back</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="action_settings">Settings</string>
 
 
 </resources>

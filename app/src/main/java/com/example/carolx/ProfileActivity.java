@@ -1,19 +1,71 @@
 package com.example.carolx;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.vikktorn.picker.City;
+import com.vikktorn.picker.Country;
+import com.vikktorn.picker.CountryPicker;
+import com.vikktorn.picker.OnCountryPickerListener;
+import com.vikktorn.picker.OnStatePickerListener;
+import com.vikktorn.picker.State;
+import com.vikktorn.picker.StatePicker;
 
-public class ProfileActivity extends AppCompatActivity {
-    private Button logout;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
+public class ProfileActivity extends AppCompatActivity implements OnStatePickerListener, OnCountryPickerListener {
     private FirebaseAuth mAuth;
+    public static int countryID, stateID;
+    private EditText pickCountry, pickStateButton;
+    private TextInputLayout cityInputLayout, mobileInputLayout, address1InputLayout, address2InputLayout;
+    // Pickers
+    private CountryPicker countryPicker;
+    private StatePicker statePicker;
+    // arrays of state object
+    public static List<State> stateObject;
+    private FrameLayout Profile_image;
+    private static final int CAMERA_REQUEST = 1888, GALLERY = 1;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+    private CircleImageView group_photo;
+    private static final String IMAGE_DIRECTORY = "/YourDirectName";
+    private SwitchCompat switchCompat;
+
 
 
     @Override
@@ -21,39 +73,299 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         mAuth = FirebaseAuth.getInstance();
+        Profile_image = findViewById(R.id.image_frame);
+        group_photo = findViewById(R.id.group_image);
+        mobileInputLayout = findViewById(R.id.mobile);
+        address1InputLayout = findViewById(R.id.address1);
+        address2InputLayout = findViewById(R.id.address2);
+        switchCompat = findViewById(R.id.switchButton);
 
 
-        logout = findViewById(R.id.logout);
-        logout.setOnClickListener(new View.OnClickListener() {
+        initView();
+
+        // get state from assets JSON
+        try {
+            getStateJson();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        // get City from assets JSON
+        try {
+            getCityJson();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // initialize country picker
+        countryPicker = new CountryPicker.Builder().with(this).listener(this).build();
+
+        // initialize listeners
+        setListener();
+        setCountryListener();
+
+        Profile_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(ProfileActivity.this);
-                builder1.setMessage("Do You want to Logout of the app?");
-                builder1.setCancelable(true);
-
-                builder1.setPositiveButton(
-                        "Yes",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                mAuth.signOut();
-                                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            }
-                        });
-
-                builder1.setNegativeButton(
-                        "No",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
+                RequestProfileImage();
             }
         });
 
+        switchCompat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(switchCompat.isChecked()){
+
+                }
+            }
+        });
     }
+
+
+    public void initView() {
+        //Buttons
+        pickStateButton = findViewById(R.id.pickState);
+        //set state picker invisible
+        pickCountry = findViewById(R.id.pickCountry);
+        // set city picker invisible
+        // Text Views
+
+
+        // initiate state object, parser, and arrays
+        stateObject = new ArrayList<>();
+    }
+
+    // SET STATE LISTENER
+    private void setListener() {
+        pickStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                statePicker.showDialog(getSupportFragmentManager());
+            }
+        });
+    }
+
+
+    //SET COUNTRY LISTENER
+    private void setCountryListener() {
+        pickCountry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countryPicker.showDialog(getSupportFragmentManager());
+            }
+        });
+    }
+
+
+    // ON SELECTED COUNTRY ADD STATES TO PICKER
+    @Override
+    public void onSelectCountry(Country country) {
+        // get country name and country ID
+        pickCountry.setText(country.getName());
+        countryID = country.getCountryId();
+        statePicker.equalStateObject.clear();
+
+        //set state name text view and state pick button invisible
+        // set text on main view
+
+
+        // GET STATES OF SELECTED COUNTRY
+        for (int i = 0; i < stateObject.size(); i++) {
+            // init state picker
+            statePicker = new StatePicker.Builder().with(this).listener(this).build();
+            State stateData = new State();
+            if (stateObject.get(i).getCountryId() == countryID) {
+
+                stateData.setStateId(stateObject.get(i).getStateId());
+                stateData.setStateName(stateObject.get(i).getStateName());
+                stateData.setCountryId(stateObject.get(i).getCountryId());
+                stateData.setFlag(country.getFlag());
+                statePicker.equalStateObject.add(stateData);
+            }
+        }
+    }
+
+
+    // ON SELECTED STATE ADD CITY TO PICKER
+    @Override
+    public void onSelectState(State state) {
+
+
+        pickStateButton.setText(state.getStateName());
+        stateID = state.getStateId();
+
+    }
+
+
+    // GET STATE FROM ASSETS JSON
+    public void getStateJson() throws JSONException {
+        String json = null;
+        try {
+            InputStream inputStream = getAssets().open("states.json");
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            json = new String(buffer, "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        JSONObject jsonObject = new JSONObject(json);
+        JSONArray events = jsonObject.getJSONArray("states");
+        for (int j = 0; j < events.length(); j++) {
+            JSONObject cit = events.getJSONObject(j);
+            State stateData = new State();
+
+            stateData.setStateId(Integer.parseInt(cit.getString("id")));
+            stateData.setStateName(cit.getString("name"));
+            stateData.setCountryId(Integer.parseInt(cit.getString("country_id")));
+            stateObject.add(stateData);
+        }
+    }
+
+
+    // GET CITY FROM ASSETS JSON
+    public void getCityJson() throws JSONException {
+        String json = null;
+        try {
+            InputStream inputStream = getAssets().open("cities.json");
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            json = new String(buffer, "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        JSONObject jsonObject = new JSONObject(json);
+        JSONArray events = jsonObject.getJSONArray("cities");
+        for (int j = 0; j < events.length(); j++) {
+            JSONObject cit = events.getJSONObject(j);
+            City cityData = new City();
+
+            cityData.setCityId(Integer.parseInt(cit.getString("id")));
+            cityData.setCityName(cit.getString("name"));
+            cityData.setStateId(Integer.parseInt(cit.getString("state_id")));
+        }
+    }
+
+    private void RequestProfileImage() {
+        AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
+        pictureDialog.setTitle("Select Action");
+        String[] pictureDialogItems = {"Select photo from gallery", "Capture photo from camera"};
+        pictureDialog.setItems(pictureDialogItems,
+                new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.M)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                choosePhotoFromGallary();
+                                break;
+                            case 1:
+                                takePhotoFromCamera();
+                                break;
+                        }
+                    }
+                });
+        pictureDialog.show();
+
+
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void takePhotoFromCamera() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+        } else {
+            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(cameraIntent, CAMERA_REQUEST);
+        }
+    }
+
+
+    private void choosePhotoFromGallary() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, GALLERY);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_CAMERA_PERMISSION_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            } else {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+
+            group_photo.setImageBitmap(photo);
+
+        } else if (requestCode == GALLERY && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                Uri contentURI = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
+                    String path = saveImage(bitmap);
+                    Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
+                    group_photo.setImageBitmap(bitmap);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+        }
+    }
+
+    private String saveImage(Bitmap myBitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
+        if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
+            wallpaperDirectory.mkdirs();
+        }
+
+        try {
+            File f = new File(wallpaperDirectory, Calendar.getInstance().getTimeInMillis() + ".jpg");
+            f.createNewFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+            MediaScannerConnection.scanFile(this,
+                    new String[]{f.getPath()},
+                    new String[]{"image/jpeg"}, null);
+            fo.close();
+            Log.d("TAG", "File Saved::---&gt;" + f.getAbsolutePath());
+
+            return f.getAbsolutePath();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return "";
+
+
+    }
+
+
+
+
 }

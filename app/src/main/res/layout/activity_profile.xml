@@ -1,36 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileActivity"
-   >
+    android:fitsSystemWindows="true"
+    tools:context=".ProfileActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_bar_height"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar"
+            android:background="#720000">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                android:background="#720000"/>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
 
-    <TextView
-        android:id="@+id/welcome"
+
+    <FrameLayout
+        android:id="@+id/image_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="WELCOME"
-        android:layout_gravity="center"
-        android:textColor="#000"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"
-        android:fontFamily="serif"
-        />
+        android:layout_margin="16dp"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        >
 
 
-    <Button
-        android:id="@+id/logout"
-        android:layout_below="@id/welcome"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/btn_rounded_red"
-        android:text="LOGOUT"
-        android:textColor="@android:color/white"
-        android:layout_centerInParent="true"/>
 
-</RelativeLayout>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/group_image"
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:src="@drawable/profile_image"
+            app:civ_border_color="#D8D6D6"
+            app:civ_border_width="2dp" />
+
+        <ImageView
+            android:id="@+id/camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="95dp"
+            android:layout_marginTop="85dp"
+            android:src="@drawable/photograph"
+            android:visibility="visible" />
+
+
+    </FrameLayout>
+
+   <include layout="@layout/content_profile"/>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
