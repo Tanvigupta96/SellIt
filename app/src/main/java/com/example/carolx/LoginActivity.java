@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         login_phone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent callIntent = new Intent(LoginActivity.this, CallLoginActivity.class);
+                Intent callIntent = new Intent(LoginActivity.this, MobileLoginActivity.class);
                 startActivity(callIntent);
 
             }

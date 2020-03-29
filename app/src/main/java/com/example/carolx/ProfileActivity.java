@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,6 +34,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.hbb20.CountryCodePicker;
 import com.vikktorn.picker.City;
 import com.vikktorn.picker.Country;
 import com.vikktorn.picker.CountryPicker;
@@ -58,8 +61,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileActivity extends AppCompatActivity implements OnStatePickerListener, OnCountryPickerListener {
     private FirebaseAuth mAuth;
     public static int countryID, stateID;
-    private EditText pickCountry, pickStateButton;
-    private TextInputLayout cityInputLayout, mobileInputLayout, address1InputLayout, address2InputLayout, pinInputLayout;
+    private EditText pickCountry, pickStateButton, mobileEditText;
+    private TextInputLayout cityInputLayout, address1InputLayout, address2InputLayout, pinInputLayout;
+
     // Pickers
     private CountryPicker countryPicker;
     private StatePicker statePicker;
@@ -77,6 +81,10 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
     private Button buttonSave;
     private AppBarLayout appBarLayout;
+    private static final String DEFAULT = "";
+    private String PhoneNumber;
+    private CountryCodePicker ccp;
+
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
 
@@ -84,12 +92,24 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_profile);
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences("mySharedPreference", MODE_PRIVATE);
+        PhoneNumber = sharedPreferences.getString("PhoneNumber", DEFAULT);
+
+        //Get all the values in String
+
+
+
+        Log.d("mobile", mobileNumber);
+
+
         mAuth = FirebaseAuth.getInstance();
         Profile_image = findViewById(R.id.image_frame);
         group_photo = findViewById(R.id.group_image);
-        mobileInputLayout = findViewById(R.id.mobile);
+        mobileEditText = findViewById(R.id.mobile);
         address1InputLayout = findViewById(R.id.address1);
         address2InputLayout = findViewById(R.id.address2);
         switchCompat = findViewById(R.id.switchButton);
@@ -97,12 +117,24 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         pinInputLayout = findViewById(R.id.pinCode);
         cityInputLayout = findViewById(R.id.city);
         toolbar = findViewById(R.id.toolbar);
-        Parent=findViewById(R.id.Parent);
+        Parent = findViewById(R.id.Parent);
+        ccp = findViewById(R.id.ccp);
+
+
+
+
+        if(PhoneNumber != DEFAULT){
+        mobileEditText.setText(PhoneNumber);
+        mobileEditText.setEnabled(false);
+        ccp.setVisibility(View.GONE);
+        }
+
+
 
 
         final androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbarLayout =  findViewById(R.id.toolbar_layout);
+        toolbarLayout = findViewById(R.id.toolbar_layout);
         getSupportActionBar().setTitle(" ");
 
 
@@ -129,9 +161,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
             }
         });
-
-
-
 
 
         initView();
@@ -426,23 +455,23 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
     private boolean validateMobile() {
-        String val = mobileInputLayout.getEditText().getText().toString();
+        String val = mobileEditText.getText().toString();
         String numberOnly = "[789]{1}[0-9]{9}";
         if (val.isEmpty()) {
-            mobileInputLayout.setError("Field can't be Empty");
+            mobileEditText.setError("Field can't be Empty");
             return false;
         } else if (val.length() < 10 || val.length() > 10) {
-            mobileInputLayout.setError("Mobile number should be of 10 digits only!");
+            mobileEditText.setError("Mobile number should be of 10 digits only!");
             return false;
 
 
         } else if (!val.matches(numberOnly)) {
-            mobileInputLayout.setError("Only Number Input is allowed");
+            mobileEditText.setError("Only Number Input is allowed");
             return false;
 
         } else {
 
-            mobileInputLayout.setError(null);
+            mobileEditText.setError(null);
             return true;
         }
 
@@ -514,8 +543,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         }
 
-        //Get all the values in String
-        mobileNumber = mobileInputLayout.getEditText().getText().toString();
+        mobileNumber = mobileEditText.getText().toString();
         AddressLine1 = address1InputLayout.getEditText().getText().toString();
         AddressLine2 = address2InputLayout.getEditText().getText().toString();
         country = pickCountry.getText().toString();
@@ -533,8 +561,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             mode = "REGULAR";
         Log.d("Mode", mode);
 
+        Intent MainScreenIntent = new Intent(ProfileActivity.this, MainScreenActivity.class);
+        startActivity(MainScreenIntent);
 
     }
-
 
 }

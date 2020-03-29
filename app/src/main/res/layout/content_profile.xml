@@ -35,23 +35,32 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.hbb20.CountryCodePicker
+                    android:id="@+id/ccp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    app:ccp_showFlag="false"
+                    android:layout_marginTop="10dp"
+                    app:ccp_showNameCode="false"
+                    />
+
+
+                <EditText
                     android:id="@+id/mobile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Mobile Number*">
+                    android:hint="Mobile Number*"
+                    android:layout_marginTop="15dp"
+                    android:inputType="number"
+                    android:textColor="@color/grey_80" />
 
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:inputType="text"
-                        android:textColor="@color/grey_80" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"

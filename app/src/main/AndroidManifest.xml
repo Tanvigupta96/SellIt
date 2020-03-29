@@ -20,7 +20,7 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".SignUpActivity" />
-        <activity android:name=".CallLoginActivity" />
+        <activity android:name=".MobileLoginActivity" />
         <activity android:name=".LoginUPActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".SplashActivity">
