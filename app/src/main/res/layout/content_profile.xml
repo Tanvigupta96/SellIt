@@ -177,8 +177,6 @@
                     </LinearLayout>
 
 
-
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -208,14 +206,15 @@
 
                     <Button
                         android:id="@+id/Buttonsave"
-                        android:layout_width="150dp"
+                        android:layout_width="180dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_save"
-                        android:text="SAVE"
                         android:layout_gravity="center"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/btn_rounded_save"
                         android:gravity="center"
-                        android:layout_marginTop="10dp"
-                        android:textColor="@android:color/white" />
+                        android:text="SAVE"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp" />
 
 
                 </LinearLayout>

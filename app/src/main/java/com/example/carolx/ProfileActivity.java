@@ -14,8 +14,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,7 +26,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.vikktorn.picker.City;
@@ -53,7 +59,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private FirebaseAuth mAuth;
     public static int countryID, stateID;
     private EditText pickCountry, pickStateButton;
-    private TextInputLayout cityInputLayout, mobileInputLayout, address1InputLayout, address2InputLayout;
+    private TextInputLayout cityInputLayout, mobileInputLayout, address1InputLayout, address2InputLayout, pinInputLayout;
     // Pickers
     private CountryPicker countryPicker;
     private StatePicker statePicker;
@@ -65,12 +71,20 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private CircleImageView group_photo;
     private static final String IMAGE_DIRECTORY = "/YourDirectName";
     private SwitchCompat switchCompat;
+    private CollapsingToolbarLayout toolbarLayout;
+    private Toolbar toolbar;
+    private LinearLayout Parent;
 
+    private Button buttonSave;
+    private AppBarLayout appBarLayout;
+
+    private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_profile);
         mAuth = FirebaseAuth.getInstance();
         Profile_image = findViewById(R.id.image_frame);
@@ -79,6 +93,45 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         address1InputLayout = findViewById(R.id.address1);
         address2InputLayout = findViewById(R.id.address2);
         switchCompat = findViewById(R.id.switchButton);
+        buttonSave = findViewById(R.id.Buttonsave);
+        pinInputLayout = findViewById(R.id.pinCode);
+        cityInputLayout = findViewById(R.id.city);
+        toolbar = findViewById(R.id.toolbar);
+        Parent=findViewById(R.id.Parent);
+
+
+        final androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbarLayout =  findViewById(R.id.toolbar_layout);
+        getSupportActionBar().setTitle(" ");
+
+
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+
+            boolean isShow = true;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    toolbarLayout.setTitle(" ");
+                    isShow = true;
+                } else if (isShow) {
+                    toolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
+
+                    isShow = false;
+                }
+
+            }
+        });
+
+
+
 
 
         initView();
@@ -113,9 +166,16 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         switchCompat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(switchCompat.isChecked()){
+                if (switchCompat.isChecked()) {
 
                 }
+            }
+        });
+
+        buttonSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveUserDeatils();
             }
         });
     }
@@ -365,7 +425,116 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
     }
 
+    private boolean validateMobile() {
+        String val = mobileInputLayout.getEditText().getText().toString();
+        String numberOnly = "[789]{1}[0-9]{9}";
+        if (val.isEmpty()) {
+            mobileInputLayout.setError("Field can't be Empty");
+            return false;
+        } else if (val.length() < 10 || val.length() > 10) {
+            mobileInputLayout.setError("Mobile number should be of 10 digits only!");
+            return false;
 
+
+        } else if (!val.matches(numberOnly)) {
+            mobileInputLayout.setError("Only Number Input is allowed");
+            return false;
+
+        } else {
+
+            mobileInputLayout.setError(null);
+            return true;
+        }
+
+    }
+
+    private boolean validateAddress() {
+        String val = address1InputLayout.getEditText().getText().toString();
+        if (val.isEmpty()) {
+            address1InputLayout.setError("Field can't be Empty");
+            return false;
+        } else {
+            address1InputLayout.setError(null);
+            return true;
+        }
+
+    }
+
+    private boolean validateCountry() {
+        String val = pickCountry.getText().toString();
+        if (val.isEmpty()) {
+            pickCountry.setError("Field can't be empty");
+            return false;
+        } else {
+            pickCountry.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateState() {
+        String val = pickStateButton.getText().toString();
+        if (val.isEmpty()) {
+            pickStateButton.setError("Field can't be empty");
+            return false;
+        } else {
+            pickStateButton.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateCity() {
+        String val = cityInputLayout.getEditText().getText().toString();
+        if (val.isEmpty()) {
+            cityInputLayout.setError("Field can't be empty");
+            return false;
+        } else {
+            cityInputLayout.setError(null);
+            return true;
+        }
+
+
+    }
+
+    private boolean validatePin() {
+        String val = pinInputLayout.getEditText().getText().toString();
+        if (val.isEmpty()) {
+            pinInputLayout.setError("Field can't be empty");
+            return false;
+        } else {
+            pinInputLayout.setError(null);
+            return true;
+        }
+
+    }
+
+
+    private void saveUserDeatils() {
+        if (!validateMobile() || !validateAddress() || !validateCountry() || !validateState() || !validateCity() || !validatePin()) {
+            return;
+
+        }
+
+        //Get all the values in String
+        mobileNumber = mobileInputLayout.getEditText().getText().toString();
+        AddressLine1 = address1InputLayout.getEditText().getText().toString();
+        AddressLine2 = address2InputLayout.getEditText().getText().toString();
+        country = pickCountry.getText().toString();
+        state = pickStateButton.getText().toString();
+        Log.d("country", country);
+        Log.d("state", state);
+
+        city = cityInputLayout.getEditText().getText().toString();
+        pin = pinInputLayout.getEditText().getText().toString();
+
+        if (switchCompat.isChecked())
+            mode = "PREMIUM";
+
+        else
+            mode = "REGULAR";
+        Log.d("Mode", mode);
+
+
+    }
 
 
 }
