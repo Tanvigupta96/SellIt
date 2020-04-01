@@ -13,25 +13,27 @@
         android:id="@+id/Parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
         android:orientation="vertical">
 
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card"
-            android:layout_width="360dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/image_frame"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="70dp"
             android:elevation="10dp"
-            app:cardCornerRadius="10dp">
+            app:cardCornerRadius="6dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="15dp">
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="25dp"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -191,28 +193,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="Select Mode"
+                        android:text="Switch to Premium"
                         android:textColor="#4E4D4D"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchButton"
-                        android:layout_width="wrap_content"
+                    <Switch
+                        android:id="@+id/switch1"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="15dp"
-                        android:checked="false"
-                        android:gravity="center"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="#4E4D4D"
-                        android:textOff="REGULAR"
-                        android:textOn="PREMIUM"
-                        android:textStyle="bold"
-                        android:thumb="@drawable/thumb_layout"
-                        app:showText="true"
-                        app:track="@drawable/switch_track" />
+                        android:text="Premium version provides you with extra features."
+                        android:maxLines="2"
+                        android:textColor="#979696"
+                        />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -221,12 +214,12 @@
                         android:text="Choose Categrory"
                         android:textColor="#4E4D4D"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"/>
 
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/categoryRecycleView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
 

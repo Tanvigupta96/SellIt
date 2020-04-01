@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.carolx.Interface.CategoryItemClickListener;
 import com.example.carolx.R;
 
 import java.util.ArrayList;
@@ -15,11 +16,13 @@ import java.util.ArrayList;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder> {
     ArrayList<String> dataSources;
     Context context;
+    CategoryItemClickListener listener;
 
 
-    public CategoryAdapter(Context context,ArrayList<String> dataSource ){
+    public CategoryAdapter(Context context,ArrayList<String> dataSource,CategoryItemClickListener listener ){
         this.dataSources = dataSource;
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -31,8 +34,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final CategoryViewHolder holder, final int position) {
         holder.btn.setText(dataSources.get(position));
+        holder.btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.itemClick(position);
+            }
+        });
 
     }
 

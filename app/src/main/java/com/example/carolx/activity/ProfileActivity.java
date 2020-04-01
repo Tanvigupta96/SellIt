@@ -19,20 +19,19 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.example.carolx.Interface.CategoryItemClickListener;
 import com.example.carolx.R;
 import com.example.carolx.adapter.CategoryAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -96,7 +95,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     private CircleImageView group_photo;
     private static final String IMAGE_DIRECTORY = "/YourDirectName";
-    private SwitchCompat switchCompat;
+    private Switch switchButton;
     private CollapsingToolbarLayout toolbarLayout;
     private Toolbar toolbar;
     private LinearLayout Parent;
@@ -109,6 +108,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private String currentUserId;
     private RecyclerView categoryRecycleView;
     private CategoryAdapter categoryAdapter;
+    private ArrayList<String> selectedCategories;
 
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
@@ -141,7 +141,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         mobileEditText = findViewById(R.id.mobile);
         address1InputLayout = findViewById(R.id.address1);
         address2InputLayout = findViewById(R.id.address2);
-        switchCompat = findViewById(R.id.switchButton);
+        switchButton = findViewById(R.id.switch1);
         buttonSave = findViewById(R.id.Buttonsave);
         pinInputLayout = findViewById(R.id.pinCode);
         cityInputLayout = findViewById(R.id.city);
@@ -191,7 +191,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         });
 
 
-
         final ArrayList<String> Categories = new ArrayList<String>();
         Categories.add("Cars");
         Categories.add("Furniture");
@@ -202,12 +201,28 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Categories.add("Sports");
         Categories.add("Electronics & Appliances");
 
-        categoryAdapter = new CategoryAdapter(this,Categories);
-        final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.HORIZONTAL);
+        selectedCategories = new ArrayList<>();
+
+        categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
+            @Override
+            public void itemClick(int position) {
+                if (selectedCategories.contains(Categories.get(position))) {
+                    selectedCategories.remove(Categories.get(position));
+
+
+                }
+                else
+                    selectedCategories.add(Categories.get(position));
+
+
+            }
+        });
+
+
+        final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
         categoryRecycleView.setLayoutManager(staggeredGridLayoutManager);
-
-
         categoryRecycleView.setAdapter(categoryAdapter);
+
 
         initView();
 
@@ -238,14 +253,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             }
         });
 
-        switchCompat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (switchCompat.isChecked()) {
-
-                }
-            }
-        });
 
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -642,12 +649,14 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         city = cityInputLayout.getEditText().getText().toString();
         pin = pinInputLayout.getEditText().getText().toString();
 
-        if (switchCompat.isChecked())
+        if (switchButton.isChecked())
             mode = "PREMIUM";
 
         else
             mode = "REGULAR";
         Log.d("Mode", mode);
+
+        Log.d("selected", selectedCategories.toString());
 
 
         HashMap<String, Object> profileMap = new HashMap<>();
@@ -660,6 +669,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         profileMap.put("city", city);
         profileMap.put("pin", pin);
         profileMap.put("mode", mode);
+        profileMap.put("selectedCategories",selectedCategories);
         rootRef.child("Users").child(currentUserId).updateChildren(profileMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -703,15 +713,14 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String pin = dataSnapshot.child("pin").getValue().toString();
                     String mode = dataSnapshot.child("mode").getValue().toString();
 
-                    if(dataSnapshot.hasChild("image")) {
+
+                    if (dataSnapshot.hasChild("image")) {
                         String retrieveProfileImage = dataSnapshot.child("image").getValue().toString();
                         Picasso.get().load(retrieveProfileImage).into(group_photo);
 
                     }
 
 
-
-                    Log.d("mode", mode);
                     mobileEditText.setText(mobile);
                     address1InputLayout.getEditText().setText(address1);
                     address2InputLayout.getEditText().setText(address2);
@@ -719,7 +728,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     pickStateButton.setText(state);
                     cityInputLayout.getEditText().setText(city);
                     pinInputLayout.getEditText().setText(pin);
-
+                    switchButton.setChecked(mode.equals("PREMIUM"));
 
 
                 }
