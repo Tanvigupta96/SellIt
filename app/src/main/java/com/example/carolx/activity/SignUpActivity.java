@@ -1,4 +1,4 @@
-package com.example.carolx;
+package com.example.carolx.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.carolx.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -41,7 +42,7 @@ public class SignUpActivity extends AppCompatActivity {
         sign_in.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(SignUpActivity.this,LoginUPActivity.class));
+                startActivity(new Intent(SignUpActivity.this, LoginUPActivity.class));
             }
         });
 
@@ -79,7 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Log.d(TAG,"createuserwithemailpasswordsuccessful");
                             FirebaseUser user=auth.getCurrentUser();
-                            Intent intent=new Intent(SignUpActivity.this,ProfileActivity.class);
+                            Intent intent=new Intent(SignUpActivity.this, ProfileActivity.class);
                             startActivity(intent);
                             finish();
 

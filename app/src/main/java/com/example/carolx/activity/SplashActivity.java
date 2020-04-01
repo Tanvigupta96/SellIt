@@ -1,4 +1,4 @@
-package com.example.carolx;
+package com.example.carolx.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,6 +13,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.carolx.R;
 
 public class SplashActivity extends AppCompatActivity {
     private static int SPLASH_SCREEN = 2500;
@@ -42,7 +44,7 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this,LoginActivity.class);
+                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
 
                 Pair[] pairs = new Pair[2];
                 pairs[0]=new Pair<View,String>(image,"logo_image");

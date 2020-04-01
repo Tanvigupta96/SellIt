@@ -15,15 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainScreenActivity"></activity>
-        <activity android:name=".VerifyPhoneActivity" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".ResetPasswordActivity" />
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".MobileLoginActivity" />
-        <activity android:name=".LoginUPActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".SplashActivity">
+        <activity android:name=".activity.MainScreenActivity"></activity>
+        <activity android:name=".activity.VerifyPhoneActivity" />
+        <activity android:name=".activity.ProfileActivity" />
+        <activity android:name=".activity.ResetPasswordActivity" />
+        <activity android:name=".activity.SignUpActivity" />
+        <activity android:name=".activity.MobileLoginActivity" />
+        <activity android:name=".activity.LoginUPActivity" />
+        <activity android:name=".activity.LoginActivity" />
+        <activity android:name=".activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,4 +1,4 @@
-package com.example.carolx;
+package com.example.carolx.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -28,7 +29,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.example.carolx.R;
+import com.example.carolx.adapter.CategoryAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
@@ -101,6 +107,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private String PhoneNumber;
     private CountryCodePicker ccp;
     private String currentUserId;
+    private RecyclerView categoryRecycleView;
+    private CategoryAdapter categoryAdapter;
 
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
@@ -141,6 +149,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Parent = findViewById(R.id.Parent);
         ccp = findViewById(R.id.ccp);
 
+        categoryRecycleView = findViewById(R.id.categoryRecycleView);
         ccp.registerCarrierNumberEditText(mobileEditText);
 
 
@@ -181,6 +190,24 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             }
         });
 
+
+
+        final ArrayList<String> Categories = new ArrayList<String>();
+        Categories.add("Cars");
+        Categories.add("Furniture");
+        Categories.add("Fashion & Beauty");
+        Categories.add("Mobiles");
+        Categories.add("Bikes");
+        Categories.add("Books");
+        Categories.add("Sports");
+        Categories.add("Electronics & Appliances");
+
+        categoryAdapter = new CategoryAdapter(this,Categories);
+        final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.HORIZONTAL);
+        categoryRecycleView.setLayoutManager(staggeredGridLayoutManager);
+
+
+        categoryRecycleView.setAdapter(categoryAdapter);
 
         initView();
 
