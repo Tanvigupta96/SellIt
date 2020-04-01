@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,11 +29,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.hbb20.CountryCodePicker;
+import com.squareup.picasso.Picasso;
 import com.vikktorn.picker.City;
 import com.vikktorn.picker.Country;
 import com.vikktorn.picker.CountryPicker;
@@ -54,12 +64,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity implements OnStatePickerListener, OnCountryPickerListener {
     private FirebaseAuth mAuth;
+    private DatabaseReference rootRef;
+
+    private StorageReference UserProfileImagesRef;
+
+
     public static int countryID, stateID;
     private EditText pickCountry, pickStateButton, mobileEditText;
     private TextInputLayout cityInputLayout, address1InputLayout, address2InputLayout, pinInputLayout;
@@ -84,6 +100,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private static final String DEFAULT = "";
     private String PhoneNumber;
     private CountryCodePicker ccp;
+    private String currentUserId;
 
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
@@ -102,13 +119,17 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         //Get all the values in String
 
 
-
         Log.d("mobile", mobileNumber);
 
 
         mAuth = FirebaseAuth.getInstance();
+        currentUserId = mAuth.getCurrentUser().getUid();
+        rootRef = FirebaseDatabase.getInstance().getReference();
+        UserProfileImagesRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
+
+
         Profile_image = findViewById(R.id.image_frame);
-        group_photo = findViewById(R.id.group_image);
+        group_photo = findViewById(R.id.userProfileImage);
         mobileEditText = findViewById(R.id.mobile);
         address1InputLayout = findViewById(R.id.address1);
         address2InputLayout = findViewById(R.id.address2);
@@ -120,16 +141,14 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Parent = findViewById(R.id.Parent);
         ccp = findViewById(R.id.ccp);
 
+        ccp.registerCarrierNumberEditText(mobileEditText);
 
 
-
-        if(PhoneNumber != DEFAULT){
-        mobileEditText.setText(PhoneNumber);
-        mobileEditText.setEnabled(false);
-        ccp.setVisibility(View.GONE);
+        if (PhoneNumber != DEFAULT) {
+            mobileEditText.setText(PhoneNumber);
+            mobileEditText.setEnabled(false);
+            ccp.setVisibility(View.GONE);
         }
-
-
 
 
         final androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
@@ -138,7 +157,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         getSupportActionBar().setTitle(" ");
 
 
-        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        appBarLayout = findViewById(R.id.app_bar);
 
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
 
@@ -207,6 +226,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                 saveUserDeatils();
             }
         });
+
+
+        retrieveUserInfo();
     }
 
 
@@ -404,7 +426,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-
             group_photo.setImageBitmap(photo);
 
         } else if (requestCode == GALLERY && resultCode == Activity.RESULT_OK) {
@@ -415,6 +436,44 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String path = saveImage(bitmap);
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     group_photo.setImageBitmap(bitmap);
+
+
+                    final StorageReference filePath = UserProfileImagesRef.child(currentUserId + ".jpg");
+                    filePath.putFile(contentURI).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+
+
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(ProfileActivity.this, "Profile picture updated successfully...", Toast.LENGTH_SHORT).show();
+                                filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        final String downloadUrl = task.getResult().toString();
+                                        rootRef.child("Users").child(currentUserId).child("images")
+                                                .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(ProfileActivity.this, "images in database added successfully...", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    String message = task.getException().toString();
+                                                    Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+
+                                    }
+                                });
+
+                            } else {
+                                String message = task.getException().toString();
+                                Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    });
+
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -455,21 +514,22 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
     private boolean validateMobile() {
-        String val = mobileEditText.getText().toString();
+        String val = ccp.getFullNumberWithPlus();
+        Log.d("val", val);
         String numberOnly = "[789]{1}[0-9]{9}";
         if (val.isEmpty()) {
             mobileEditText.setError("Field can't be Empty");
             return false;
-        } else if (val.length() < 10 || val.length() > 10) {
+        } else if (val.length() < 13) {
             mobileEditText.setError("Mobile number should be of 10 digits only!");
             return false;
 
 
-        } else if (!val.matches(numberOnly)) {
+        } /*else if (!val.matches(numberOnly)) {
             mobileEditText.setError("Only Number Input is allowed");
             return false;
 
-        } else {
+        } */ else {
 
             mobileEditText.setError(null);
             return true;
@@ -543,7 +603,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         }
 
-        mobileNumber = mobileEditText.getText().toString();
+
+        mobileNumber = ccp.getFullNumberWithPlus();
         AddressLine1 = address1InputLayout.getEditText().getText().toString();
         AddressLine2 = address2InputLayout.getEditText().getText().toString();
         country = pickCountry.getText().toString();
@@ -561,9 +622,98 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             mode = "REGULAR";
         Log.d("Mode", mode);
 
+
+        HashMap<String, Object> profileMap = new HashMap<>();
+        profileMap.put("uid", currentUserId);
+        profileMap.put("mobile", mobileNumber);
+        profileMap.put("address1", AddressLine1);
+        profileMap.put("address2", AddressLine2);
+        profileMap.put("country", country);
+        profileMap.put("state", state);
+        profileMap.put("city", city);
+        profileMap.put("pin", pin);
+        profileMap.put("mode", mode);
+        rootRef.child("Users").child(currentUserId).updateChildren(profileMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    sendUserToMainActivity();
+                    Toast.makeText(ProfileActivity.this, "profile updated successfully...", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    String message = task.getException().toString();
+                    Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+
+
+                }
+
+            }
+        });
+
+        Log.d("map", profileMap.toString());
+
+
         Intent MainScreenIntent = new Intent(ProfileActivity.this, MainScreenActivity.class);
         startActivity(MainScreenIntent);
 
     }
+
+
+    private void retrieveUserInfo() {
+        ccp.setVisibility(View.GONE);
+        rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode") || dataSnapshot.hasChild("image"))) {
+
+                    String mobile = dataSnapshot.child("mobile").getValue().toString();
+                    String address1 = dataSnapshot.child("address1").getValue().toString();
+                    String address2 = dataSnapshot.child("address2").getValue().toString();
+                    String country = dataSnapshot.child("country").getValue().toString();
+                    String state = dataSnapshot.child("state").getValue().toString();
+                    String city = dataSnapshot.child("city").getValue().toString();
+                    String pin = dataSnapshot.child("pin").getValue().toString();
+                    String mode = dataSnapshot.child("mode").getValue().toString();
+
+                    if(dataSnapshot.hasChild("image")) {
+                        String retrieveProfileImage = dataSnapshot.child("image").getValue().toString();
+                        Picasso.get().load(retrieveProfileImage).into(group_photo);
+
+                    }
+
+
+
+                    Log.d("mode", mode);
+                    mobileEditText.setText(mobile);
+                    address1InputLayout.getEditText().setText(address1);
+                    address2InputLayout.getEditText().setText(address2);
+                    pickCountry.setText(country);
+                    pickStateButton.setText(state);
+                    cityInputLayout.getEditText().setText(city);
+                    pinInputLayout.getEditText().setText(pin);
+
+
+
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void sendUserToMainActivity() {
+        Intent mainIntent = new Intent(ProfileActivity.this, MainScreenActivity.class);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(mainIntent);
+        finish();
+    }
+
 
 }

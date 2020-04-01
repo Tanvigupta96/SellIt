@@ -57,8 +57,9 @@
                     android:layout_height="wrap_content"
                     android:hint="Mobile Number*"
                     android:layout_marginTop="15dp"
-                    android:inputType="number"
-                    android:textColor="@color/grey_80" />
+                    android:inputType="phone"
+                    android:textColor="@color/grey_80"
+                    android:maxLength="13"/>
 
                 </LinearLayout>
 
@@ -212,6 +213,16 @@
                         android:thumb="@drawable/thumb_layout"
                         app:showText="true"
                         app:track="@drawable/switch_track" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="Choose Categrory"
+                        android:textColor="#4E4D4D"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
 
                     <Button
                         android:id="@+id/Buttonsave"
