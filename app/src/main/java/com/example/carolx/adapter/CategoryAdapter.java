@@ -40,6 +40,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder>  {
     @Override
     public void onBindViewHolder(@NonNull final CategoryViewHolder holder, final int position) {
         holder.btn.setText(dataSources.get(position));
+        listener.fetchedCategoriesIndex(holder.btn, position);
         holder.btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

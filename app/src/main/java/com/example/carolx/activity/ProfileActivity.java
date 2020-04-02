@@ -74,6 +74,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -85,7 +86,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
     private StorageReference UserProfileImagesRef;
     private String TAG = "profile_activity";
-
     public static int countryID, stateID;
     private EditText pickCountry, pickStateButton, mobileEditText;
     private TextInputLayout cityInputLayout, address1InputLayout, address2InputLayout, pinInputLayout;
@@ -214,34 +214,31 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         selectedCategories = new ArrayList<>();
         positionsArray = new ArrayList<>();
 
-        categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
-            @Override
-            public void selectedViewHolder(Button categoryButton, int position) {
-                Log.d(TAG, "Category Clicked: " + position);
-                if (selectedCategories.contains(Categories.get(position))) {
-                    Log.d(TAG, "Category Removed: " + position);
-                    selectedCategories.remove(Categories.get(position));
-                   // positionsArray.remove(position);
-                    categoryButton.setBackgroundResource(R.drawable.btn_category);
-                    categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+//        categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
+//            @Override
+//            public void selectedViewHolder(Button categoryButton, int position) {
+//                Log.d(TAG, "Category Clicked: " + position);
+//                if (selectedCategories.contains(Categories.get(position))) {
+//                    Log.d(TAG, "Category Removed: " + position);
+//                    selectedCategories.remove(Categories.get(position));
+//                   // positionsArray.remove(position);
+//                    categoryButton.setBackgroundResource(R.drawable.btn_category);
+//                    categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+//
+//                }
+//                else {
+//                    Log.d(TAG, "Category Added: "+ position);
+//                    selectedCategories.add(Categories.get(position));
+//                    positionsArray.add(position);
+//                    categoryButton.setTextColor(getResources().getColor(R.color.white));
+//                    categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
+//                }
+//            }
+//
+//        });
 
-                }
-                else {
-                    Log.d(TAG, "Category Added: "+ position);
-                    selectedCategories.add(Categories.get(position));
-                    positionsArray.add(position);
-                    categoryButton.setTextColor(getResources().getColor(R.color.white));
-                    categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
-                }
-            }
 
-        });
-
-
-        final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
-        categoryRecycleView.setLayoutManager(staggeredGridLayoutManager);
-        categoryRecycleView.setAdapter(categoryAdapter);
-
+        initCategoryAdapter(selectedCategories);
 
         initView();
 
@@ -728,6 +725,56 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
 
+    private void initCategoryAdapter(final ArrayList<String> fetchedCatsArrayList){
+        Log.d(TAG, "initCategoryAdapter: ");
+        Log.d(TAG, "SelectedCategoryArraySize "+selectedCategories.size());
+            categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
+                @Override
+                public void selectedViewHolder(Button categoryButton, int position) {
+                    if (selectedCategories.contains(Categories.get(position))) {
+                        Log.d(TAG, "Category Removed: " + position);
+                        selectedCategories.remove(Categories.get(position));
+                        // positionsArray.remove(position);
+                        categoryButton.setBackgroundResource(R.drawable.btn_category);
+                        categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+                    }
+                    else {
+                        Log.d(TAG, "Category Added: "+ position);
+                        selectedCategories.add(Categories.get(position));
+                        positionsArray.add(position);
+                        categoryButton.setTextColor(getResources().getColor(R.color.white));
+                        categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
+                    }
+                    Log.d(TAG, "SelectedCategoryArraySize "+selectedCategories.size());
+                }
+
+                @Override
+                public void fetchedCategoriesIndex(Button categoryButton, int index) {
+                    if (fetchedCatsArrayList.size() != 0){
+                        for(String item : fetchedCatsArrayList)
+                        {
+                            int selectedPosition = Categories.indexOf(item);
+                            Log.d(TAG, "inIterator!");
+                            Log.d(TAG, "index: "+index);
+                            if (index == selectedPosition){
+                                categoryButton.setTextColor(getResources().getColor(R.color.white));
+                                categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
+                            }
+                        }
+                    }
+                }
+            });
+
+
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
+        categoryRecycleView.setLayoutManager(staggeredGridLayoutManager);
+        categoryRecycleView.setAdapter(categoryAdapter);
+        selectedCategories.clear();
+    }
+
+
+
     private void retrieveUserInfo() {
         ccp.setVisibility(View.GONE);
         rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
@@ -744,17 +791,17 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String city = dataSnapshot.child("city").getValue().toString();
                     String pin = dataSnapshot.child("pin").getValue().toString();
                     String mode = dataSnapshot.child("mode").getValue().toString();
-                    ArrayList<String> fetchedCategories;
-
-                    fetchedCategories = (ArrayList<String>) dataSnapshot.child("selectedCategories").getValue();
-
-                    Log.d("Fetched",fetchedCategories.toString());
-
-                    int pos;
-                    for(int i=0;i<fetchedCategories.size();i++){
-                        pos = Categories.indexOf(fetchedCategories.get(i));
 
 
+                    try {
+                        ArrayList<String> fetchedCategories;
+
+                        fetchedCategories = (ArrayList<String>) dataSnapshot.child("selectedCategories").getValue();
+
+                        Log.d(TAG, fetchedCategories.toString());
+                        initCategoryAdapter(fetchedCategories);
+                    }catch (Exception e){
+                        Log.d(TAG, "Fetched Categories ArrayList: "+e.toString());
                     }
 
 
