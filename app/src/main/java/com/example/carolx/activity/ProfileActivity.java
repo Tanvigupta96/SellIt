@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -214,24 +215,17 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                 if (selectedCategories.contains(Categories.get(position))) {
                     Log.d(TAG, "Category Removed: "+position);
                     selectedCategories.remove(Categories.get(position));
-                    categoryButton.setBackgroundColor(Color.WHITE);
+                    categoryButton.setBackgroundResource(R.drawable.btn_category);
+                    categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+
                 }
                 else {
                     Log.d(TAG, "Category Added: "+position);
                     selectedCategories.add(Categories.get(position));
-                    categoryButton.setBackgroundColor(Color.GREEN);
+                    categoryButton.setTextColor(getResources().getColor(R.color.white));
+                    categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                 }
             }
-//            @Override
-//            public void itemClick(int position) {
-//                if (selectedCategories.contains(Categories.get(position))) {
-//                    selectedCategories.remove(Categories.get(position));
-//                }
-//                else {
-//                    selectedCategories.add(Categories.get(position));
-//                }
-//            }
-
 
         });
 
