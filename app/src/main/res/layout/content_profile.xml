@@ -205,6 +205,8 @@
                         android:text="Premium version provides you with extra features."
                         android:maxLines="2"
                         android:textColor="#979696"
+                        android:track="@drawable/switch_track"
+                        android:thumb="@drawable/thumb_layout"
                         />
 
                     <TextView
