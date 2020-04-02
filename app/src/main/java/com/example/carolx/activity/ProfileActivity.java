@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -32,8 +33,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.carolx.Interface.CategoryItemClickListener;
+import com.example.carolx.Interface.SelectedCategoryInterface;
 import com.example.carolx.R;
 import com.example.carolx.adapter.CategoryAdapter;
+import com.example.carolx.adapter.CategoryViewHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
@@ -79,7 +82,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private DatabaseReference rootRef;
 
     private StorageReference UserProfileImagesRef;
-
+    private String TAG = "profile_activity";
 
     public static int countryID, stateID;
     private EditText pickCountry, pickStateButton, mobileEditText;
@@ -109,6 +112,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private RecyclerView categoryRecycleView;
     private CategoryAdapter categoryAdapter;
     private ArrayList<String> selectedCategories;
+    private SelectedCategoryInterface mSelectedCategoryInterface;
 
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
@@ -205,17 +209,30 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
             @Override
-            public void itemClick(int position) {
+            public void selectedViewHolder(Button categoryButton, int position) {
+                Log.d(TAG, "Category Clicked: "+position);
                 if (selectedCategories.contains(Categories.get(position))) {
+                    Log.d(TAG, "Category Removed: "+position);
                     selectedCategories.remove(Categories.get(position));
-
-
+                    categoryButton.setBackgroundColor(Color.WHITE);
                 }
-                else
+                else {
+                    Log.d(TAG, "Category Added: "+position);
                     selectedCategories.add(Categories.get(position));
-
-
+                    categoryButton.setBackgroundColor(Color.GREEN);
+                }
             }
+//            @Override
+//            public void itemClick(int position) {
+//                if (selectedCategories.contains(Categories.get(position))) {
+//                    selectedCategories.remove(Categories.get(position));
+//                }
+//                else {
+//                    selectedCategories.add(Categories.get(position));
+//                }
+//            }
+
+
         });
 
 
