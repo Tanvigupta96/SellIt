@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -114,6 +115,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private CategoryAdapter categoryAdapter;
     private ArrayList<String> selectedCategories;
     private SelectedCategoryInterface mSelectedCategoryInterface;
+    private TextView chooseCategoryTextView;
+    private List<Integer> positionsArray;
+    private ArrayList<String> Categories;
 
 
     private String mobileNumber = " ", AddressLine1 = " ", AddressLine2 = " ", country = " ", state = " ", city = " ", pin = " ", mode = "REGULAR";
@@ -153,6 +157,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         toolbar = findViewById(R.id.toolbar);
         Parent = findViewById(R.id.Parent);
         ccp = findViewById(R.id.ccp);
+        chooseCategoryTextView = findViewById(R.id.chooseCategoryTextView);
 
         categoryRecycleView = findViewById(R.id.categoryRecycleView);
         ccp.registerCarrierNumberEditText(mobileEditText);
@@ -196,7 +201,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         });
 
 
-        final ArrayList<String> Categories = new ArrayList<String>();
+        Categories = new ArrayList<String>();
         Categories.add("Cars");
         Categories.add("Furniture");
         Categories.add("Fashion & Beauty");
@@ -207,21 +212,24 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Categories.add("Electronics & Appliances");
 
         selectedCategories = new ArrayList<>();
+        positionsArray = new ArrayList<>();
 
         categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
             @Override
             public void selectedViewHolder(Button categoryButton, int position) {
-                Log.d(TAG, "Category Clicked: "+position);
+                Log.d(TAG, "Category Clicked: " + position);
                 if (selectedCategories.contains(Categories.get(position))) {
-                    Log.d(TAG, "Category Removed: "+position);
+                    Log.d(TAG, "Category Removed: " + position);
                     selectedCategories.remove(Categories.get(position));
+                   // positionsArray.remove(position);
                     categoryButton.setBackgroundResource(R.drawable.btn_category);
                     categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
 
                 }
                 else {
-                    Log.d(TAG, "Category Added: "+position);
+                    Log.d(TAG, "Category Added: "+ position);
                     selectedCategories.add(Categories.get(position));
+                    positionsArray.add(position);
                     categoryButton.setTextColor(getResources().getColor(R.color.white));
                     categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                 }
@@ -641,6 +649,18 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
     }
 
+    private boolean validateCategories(){
+        if(selectedCategories.size() == 0){
+            chooseCategoryTextView.setError("Select atleast 1 Category");
+            return false;
+
+        }
+        else{
+            chooseCategoryTextView.setError(null);
+            return true;
+        }
+    }
+
 
     private void saveUserDeatils() {
         if (!validateMobile() || !validateAddress() || !validateCountry() || !validateState() || !validateCity() || !validatePin()) {
@@ -668,6 +688,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Log.d("Mode", mode);
 
         Log.d("selected", selectedCategories.toString());
+        Log.d("selected pos", String.valueOf(positionsArray));
 
 
         HashMap<String, Object> profileMap = new HashMap<>();
@@ -713,7 +734,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             @Override
 
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode") || dataSnapshot.hasChild("image"))) {
+                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode") || dataSnapshot.hasChild("image") && dataSnapshot.hasChild("selectedCategories"))) {
 
                     String mobile = dataSnapshot.child("mobile").getValue().toString();
                     String address1 = dataSnapshot.child("address1").getValue().toString();
@@ -723,6 +744,21 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String city = dataSnapshot.child("city").getValue().toString();
                     String pin = dataSnapshot.child("pin").getValue().toString();
                     String mode = dataSnapshot.child("mode").getValue().toString();
+                    ArrayList<String> fetchedCategories;
+
+                    fetchedCategories = (ArrayList<String>) dataSnapshot.child("selectedCategories").getValue();
+
+                    Log.d("Fetched",fetchedCategories.toString());
+
+                    int pos;
+                    for(int i=0;i<fetchedCategories.size();i++){
+                        pos = Categories.indexOf(fetchedCategories.get(i));
+
+
+                    }
+
+
+
 
 
                     if (dataSnapshot.hasChild("images")) {
