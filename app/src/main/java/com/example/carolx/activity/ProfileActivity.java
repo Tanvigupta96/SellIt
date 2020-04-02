@@ -714,8 +714,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String mode = dataSnapshot.child("mode").getValue().toString();
 
 
-                    if (dataSnapshot.hasChild("image")) {
-                        String retrieveProfileImage = dataSnapshot.child("image").getValue().toString();
+                    if (dataSnapshot.hasChild("images")) {
+                        String retrieveProfileImage = dataSnapshot.child("images").getValue().toString();
                         Picasso.get().load(retrieveProfileImage).into(group_photo);
 
                     }
