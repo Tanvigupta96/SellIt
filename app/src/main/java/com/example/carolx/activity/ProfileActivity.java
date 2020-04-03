@@ -2,6 +2,7 @@ package com.example.carolx.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -112,9 +113,15 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private CountryCodePicker ccp;
     private String currentUserId;
     private RecyclerView categoryRecycleView;
+
     private CategoryAdapter categoryAdapter;
+    private ProgressDialog loadingBar;
+
+
+
+
+
     private ArrayList<String> selectedCategories;
-    private SelectedCategoryInterface mSelectedCategoryInterface;
     private TextView chooseCategoryTextView;
     private List<Integer> positionsArray;
     private ArrayList<String> Categories;
@@ -158,16 +165,18 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Parent = findViewById(R.id.Parent);
         ccp = findViewById(R.id.ccp);
         chooseCategoryTextView = findViewById(R.id.chooseCategoryTextView);
+        loadingBar = new ProgressDialog(this,R.style.MyAlertDialogStyle);
+
 
         categoryRecycleView = findViewById(R.id.categoryRecycleView);
         ccp.registerCarrierNumberEditText(mobileEditText);
 
 
-        if (PhoneNumber != DEFAULT) {
+       /* if (PhoneNumber != DEFAULT) {
             mobileEditText.setText(PhoneNumber);
             mobileEditText.setEnabled(false);
             ccp.setVisibility(View.GONE);
-        }
+        }*/
 
 
         final androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
@@ -192,7 +201,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     toolbarLayout.setTitle(" ");
                     isShow = true;
                 } else if (isShow) {
-                    toolbarLayout.setTitle(" ");//carefull there should a space between double quote otherwise it wont work
+                    toolbarLayout.setTitle(" ");//careful there should a space between double quote otherwise it wont work
 
                     isShow = false;
                 }
@@ -213,29 +222,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         selectedCategories = new ArrayList<>();
         positionsArray = new ArrayList<>();
-
-//        categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
-//            @Override
-//            public void selectedViewHolder(Button categoryButton, int position) {
-//                Log.d(TAG, "Category Clicked: " + position);
-//                if (selectedCategories.contains(Categories.get(position))) {
-//                    Log.d(TAG, "Category Removed: " + position);
-//                    selectedCategories.remove(Categories.get(position));
-//                   // positionsArray.remove(position);
-//                    categoryButton.setBackgroundResource(R.drawable.btn_category);
-//                    categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
-//
-//                }
-//                else {
-//                    Log.d(TAG, "Category Added: "+ position);
-//                    selectedCategories.add(Categories.get(position));
-//                    positionsArray.add(position);
-//                    categoryButton.setTextColor(getResources().getColor(R.color.white));
-//                    categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
-//                }
-//            }
-//
-//        });
 
 
         initCategoryAdapter(selectedCategories);
@@ -479,6 +465,10 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             group_photo.setImageBitmap(photo);
 
         } else if (requestCode == GALLERY && resultCode == Activity.RESULT_OK) {
+            loadingBar.setTitle("set Profile Image");
+            loadingBar.setMessage("please wait, your profile image is being uploaded");
+            loadingBar.setCanceledOnTouchOutside(false);
+            loadingBar.show();
             if (data != null) {
                 Uri contentURI = data.getData();
                 try {
@@ -486,6 +476,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     String path = saveImage(bitmap);
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     group_photo.setImageBitmap(bitmap);
+
 
 
                     final StorageReference filePath = UserProfileImagesRef.child(currentUserId + ".jpg");
@@ -506,9 +497,13 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Toast.makeText(ProfileActivity.this, "images in database added successfully...", Toast.LENGTH_SHORT).show();
+                                                    loadingBar.dismiss();
+
                                                 } else {
                                                     String message = task.getException().toString();
                                                     Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+                                                    loadingBar.dismiss();
+
                                                 }
                                             }
                                         });
@@ -519,6 +514,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                             } else {
                                 String message = task.getException().toString();
                                 Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+                                loadingBar.dismiss();
+
                             }
 
                         }
@@ -646,13 +643,12 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
     }
 
-    private boolean validateCategories(){
-        if(selectedCategories.size() == 0){
+    private boolean validateCategories() {
+        if (selectedCategories.size() == 0) {
             chooseCategoryTextView.setError("Select atleast 1 Category");
             return false;
 
-        }
-        else{
+        } else {
             chooseCategoryTextView.setError(null);
             return true;
         }
@@ -665,7 +661,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         }
 
-
         mobileNumber = ccp.getFullNumberWithPlus();
         AddressLine1 = address1InputLayout.getEditText().getText().toString();
         AddressLine2 = address2InputLayout.getEditText().getText().toString();
@@ -673,7 +668,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         state = pickStateButton.getText().toString();
         Log.d("country", country);
         Log.d("state", state);
-
         city = cityInputLayout.getEditText().getText().toString();
         pin = pinInputLayout.getEditText().getText().toString();
 
@@ -698,7 +692,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         profileMap.put("city", city);
         profileMap.put("pin", pin);
         profileMap.put("mode", mode);
-        profileMap.put("selectedCategories",selectedCategories);
+        profileMap.put("selectedCategories", selectedCategories);
         rootRef.child("Users").child(currentUserId).updateChildren(profileMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -725,46 +719,43 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
 
-    private void initCategoryAdapter(final ArrayList<String> fetchedCatsArrayList){
+    private void initCategoryAdapter(final ArrayList<String> fetchedCatsArrayList) {
         Log.d(TAG, "initCategoryAdapter: ");
-        Log.d(TAG, "SelectedCategoryArraySize "+selectedCategories.size());
-            categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
-                @Override
-                public void selectedViewHolder(Button categoryButton, int position) {
-                    if (selectedCategories.contains(Categories.get(position))) {
-                        Log.d(TAG, "Category Removed: " + position);
-                        selectedCategories.remove(Categories.get(position));
-                        // positionsArray.remove(position);
-                        categoryButton.setBackgroundResource(R.drawable.btn_category);
-                        categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+        Log.d(TAG, "SelectedCategoryArraySize " + selectedCategories.size());
+        categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
+            @Override
+            public void selectedViewHolder(Button categoryButton, int position) {
+                if (selectedCategories.contains(Categories.get(position))) {
+                    Log.d(TAG, "Category Removed: " + position);
+                    selectedCategories.remove(Categories.get(position));
+                    categoryButton.setBackgroundResource(R.drawable.btn_category);
+                    categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
 
-                    }
-                    else {
-                        Log.d(TAG, "Category Added: "+ position);
-                        selectedCategories.add(Categories.get(position));
-                        positionsArray.add(position);
-                        categoryButton.setTextColor(getResources().getColor(R.color.white));
-                        categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
-                    }
-                    Log.d(TAG, "SelectedCategoryArraySize "+selectedCategories.size());
+                } else {
+                    Log.d(TAG, "Category Added: " + position);
+                    selectedCategories.add(Categories.get(position));
+                    positionsArray.add(position);
+                    categoryButton.setTextColor(getResources().getColor(R.color.white));
+                    categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                 }
+                Log.d(TAG, "SelectedCategoryArraySize " + selectedCategories.size());
+            }
 
-                @Override
-                public void fetchedCategoriesIndex(Button categoryButton, int index) {
-                    if (fetchedCatsArrayList.size() != 0){
-                        for(String item : fetchedCatsArrayList)
-                        {
-                            int selectedPosition = Categories.indexOf(item);
-                            Log.d(TAG, "inIterator!");
-                            Log.d(TAG, "index: "+index);
-                            if (index == selectedPosition){
-                                categoryButton.setTextColor(getResources().getColor(R.color.white));
-                                categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
-                            }
+            @Override
+            public void fetchedCategoriesIndex(Button categoryButton, int index) {
+                if (fetchedCatsArrayList.size() != 0) {
+                    for (String item : fetchedCatsArrayList) {
+                        int selectedPosition = Categories.indexOf(item);
+                        Log.d(TAG, "inIterator!");
+                        Log.d(TAG, "index: " + index);
+                        if (index == selectedPosition) {
+                            categoryButton.setTextColor(getResources().getColor(R.color.white));
+                            categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                         }
                     }
                 }
-            });
+            }
+        });
 
 
         StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
@@ -774,14 +765,17 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
 
-
     private void retrieveUserInfo() {
-        ccp.setVisibility(View.GONE);
+        if (PhoneNumber != DEFAULT) {
+            mobileEditText.setText(PhoneNumber);
+            mobileEditText.setEnabled(false);
+            ccp.setVisibility(View.GONE);
+        }
         rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
             @Override
 
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode") || dataSnapshot.hasChild("image") && dataSnapshot.hasChild("selectedCategories"))) {
+                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode")  && dataSnapshot.hasChild("selectedCategories") || dataSnapshot.hasChild("image"))) {
 
                     String mobile = dataSnapshot.child("mobile").getValue().toString();
                     String address1 = dataSnapshot.child("address1").getValue().toString();
@@ -800,12 +794,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
                         Log.d(TAG, fetchedCategories.toString());
                         initCategoryAdapter(fetchedCategories);
-                    }catch (Exception e){
-                        Log.d(TAG, "Fetched Categories ArrayList: "+e.toString());
+                    } catch (Exception e) {
+                        Log.d(TAG, "Fetched Categories ArrayList: " + e.toString());
                     }
-
-
-
 
 
                     if (dataSnapshot.hasChild("images")) {
