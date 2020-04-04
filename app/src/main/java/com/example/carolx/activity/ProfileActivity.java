@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -36,10 +34,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.carolx.Interface.CategoryItemClickListener;
-import com.example.carolx.Interface.SelectedCategoryInterface;
 import com.example.carolx.R;
 import com.example.carolx.adapter.CategoryAdapter;
-import com.example.carolx.adapter.CategoryViewHolder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
@@ -75,7 +71,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -118,10 +113,10 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private ProgressDialog loadingBar;
 
 
+    private ArrayList<String> fetchedCategories = new ArrayList<>();
 
-
-
-    private ArrayList<String> selectedCategories;
+//
+//    private ArrayList<String> selectedCategories;
     private TextView chooseCategoryTextView;
     private List<Integer> positionsArray;
     private ArrayList<String> Categories;
@@ -220,11 +215,11 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Categories.add("Sports");
         Categories.add("Electronics & Appliances");
 
-        selectedCategories = new ArrayList<>();
+//        selectedCategories = new ArrayList<>();
         positionsArray = new ArrayList<>();
 
 
-        initCategoryAdapter(selectedCategories);
+        initCategoryAdapter();
 
         initView();
 
@@ -644,7 +639,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
     private boolean validateCategories() {
-        if (selectedCategories.size() == 0) {
+        if (fetchedCategories.size() == 0) {
             chooseCategoryTextView.setError("Select atleast 1 Category");
             return false;
 
@@ -678,7 +673,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             mode = "REGULAR";
         Log.d("Mode", mode);
 
-        Log.d("selected", selectedCategories.toString());
+        Log.d("selected", fetchedCategories.toString());
         Log.d("selected pos", String.valueOf(positionsArray));
 
 
@@ -692,7 +687,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         profileMap.put("city", city);
         profileMap.put("pin", pin);
         profileMap.put("mode", mode);
-        profileMap.put("selectedCategories", selectedCategories);
+        Log.d(TAG, "FetchedCategores Size: "+fetchedCategories.size());
+        profileMap.put("selectedCategories", fetchedCategories);
         rootRef.child("Users").child(currentUserId).updateChildren(profileMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -719,32 +715,29 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     }
 
 
-    private void initCategoryAdapter(final ArrayList<String> fetchedCatsArrayList) {
+    private void initCategoryAdapter() {
         Log.d(TAG, "initCategoryAdapter: ");
-        Log.d(TAG, "SelectedCategoryArraySize " + selectedCategories.size());
         categoryAdapter = new CategoryAdapter(this, Categories, new CategoryItemClickListener() {
             @Override
             public void selectedViewHolder(Button categoryButton, int position) {
-                if (selectedCategories.contains(Categories.get(position))) {
+                if (fetchedCategories.contains(Categories.get(position))) {
                     Log.d(TAG, "Category Removed: " + position);
-                    selectedCategories.remove(Categories.get(position));
+                    fetchedCategories.remove(Categories.get(position));
                     categoryButton.setBackgroundResource(R.drawable.btn_category);
                     categoryButton.setTextColor(getResources().getColor(R.color.colorPrimary));
-
                 } else {
                     Log.d(TAG, "Category Added: " + position);
-                    selectedCategories.add(Categories.get(position));
+                    fetchedCategories.add(Categories.get(position));
                     positionsArray.add(position);
                     categoryButton.setTextColor(getResources().getColor(R.color.white));
                     categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                 }
-                Log.d(TAG, "SelectedCategoryArraySize " + selectedCategories.size());
             }
 
             @Override
             public void fetchedCategoriesIndex(Button categoryButton, int index) {
-                if (fetchedCatsArrayList.size() != 0) {
-                    for (String item : fetchedCatsArrayList) {
+                if (fetchedCategories.size() != 0) {
+                    for (String item : fetchedCategories) {
                         int selectedPosition = Categories.indexOf(item);
                         Log.d(TAG, "inIterator!");
                         Log.d(TAG, "index: " + index);
@@ -753,6 +746,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                             categoryButton.setBackgroundResource(R.drawable.btn_radius_category);
                         }
                     }
+
                 }
             }
         });
@@ -761,7 +755,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
         categoryRecycleView.setLayoutManager(staggeredGridLayoutManager);
         categoryRecycleView.setAdapter(categoryAdapter);
-        selectedCategories.clear();
     }
 
 
@@ -788,12 +781,12 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
 
                     try {
-                        ArrayList<String> fetchedCategories;
-
                         fetchedCategories = (ArrayList<String>) dataSnapshot.child("selectedCategories").getValue();
 
-                        Log.d(TAG, fetchedCategories.toString());
-                        initCategoryAdapter(fetchedCategories);
+                        if (fetchedCategories != null) {
+                            Log.d(TAG, fetchedCategories.toString());
+                        }
+                        initCategoryAdapter();
                     } catch (Exception e) {
                         Log.d(TAG, "Fetched Categories ArrayList: " + e.toString());
                     }
