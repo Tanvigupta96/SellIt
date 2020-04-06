@@ -37,7 +37,7 @@
 
 
 
-    <FrameLayout
+   <!-- <FrameLayout
         android:id="@+id/image_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,15 +46,35 @@
         app:layout_anchorGravity="bottom|end"
         >
 
+-->
+   <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/image_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       android:layout_margin="16dp"
+       app:layout_anchor="@id/app_bar"
+       app:layout_anchorGravity="bottom|end"
+       >
 
 
-        <de.hdodenhof.circleimageview.CircleImageView
+    <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/userProfileImage"
             android:layout_width="160dp"
             android:layout_height="120dp"
             android:src="@drawable/profile_image"
             app:civ_border_color="#D8D6D6"
             app:civ_border_width="2dp" />
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/ballspinfadeoader"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:indicator="BallSpinFadeLoader"
+            app:indicator_color="#ffffff"
+            android:visibility="visible"
+            android:layout_margin="65dp"
+
+            />
 
         <ImageView
             android:id="@+id/camera"
@@ -66,8 +86,7 @@
             android:visibility="visible" />
 
 
-    </FrameLayout>
-
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
    <include layout="@layout/content_profile"/>
 
 

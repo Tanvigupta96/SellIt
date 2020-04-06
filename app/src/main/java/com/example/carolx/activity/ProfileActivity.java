@@ -30,6 +30,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -91,7 +92,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private StatePicker statePicker;
     // arrays of state object
     public static List<State> stateObject;
-    private FrameLayout Profile_image;
+    private CoordinatorLayout Profile_image;
     private static final int CAMERA_REQUEST = 1888, GALLERY = 1;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     private CircleImageView group_photo;
@@ -520,6 +521,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                 } catch (IOException e) {
                     e.printStackTrace();
                     Toast.makeText(getApplicationContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                    loadingBar.dismiss();
                 }
             }
 
@@ -759,6 +761,12 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
 
     private void retrieveUserInfo() {
+        ballspinfadeloader();
+        loadingBar.setTitle("Setting Profile ");
+        loadingBar.setMessage("please wait, while we are getting your Details...");
+        loadingBar.setCanceledOnTouchOutside(false);
+        loadingBar.show();
+
         if (PhoneNumber != DEFAULT) {
             mobileEditText.setText(PhoneNumber);
             mobileEditText.setEnabled(false);
@@ -791,13 +799,13 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                         Log.d(TAG, "Fetched Categories ArrayList: " + e.toString());
                     }
 
-
                     if (dataSnapshot.hasChild("images")) {
+                        ballspinfadeloader();
                         String retrieveProfileImage = dataSnapshot.child("images").getValue().toString();
+                        ballspinfadeloadergone();
                         Picasso.get().load(retrieveProfileImage).into(group_photo);
 
                     }
-
 
                     mobileEditText.setText(mobile);
                     address1InputLayout.getEditText().setText(address1);
@@ -807,6 +815,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     cityInputLayout.getEditText().setText(city);
                     pinInputLayout.getEditText().setText(pin);
                     switchButton.setChecked(mode.equals("PREMIUM"));
+
+                    loadingBar.dismiss();
 
 
                 }
@@ -828,6 +838,16 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         startActivity(mainIntent);
         finish();
     }
+
+    public void ballspinfadeloader(){
+        findViewById(R.id.ballspinfadeoader).setVisibility(View.VISIBLE);
+    }
+
+
+    public void ballspinfadeloadergone(){
+        findViewById(R.id.ballspinfadeoader).setVisibility(View.GONE);
+    }
+
 
 
 }
