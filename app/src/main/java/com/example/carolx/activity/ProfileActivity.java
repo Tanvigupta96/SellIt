@@ -800,7 +800,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     }
 
                     if (dataSnapshot.hasChild("images")) {
-                        ballspinfadeloader();
                         String retrieveProfileImage = dataSnapshot.child("images").getValue().toString();
                         ballspinfadeloadergone();
                         Picasso.get().load(retrieveProfileImage).into(group_photo);
@@ -817,6 +816,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                     switchButton.setChecked(mode.equals("PREMIUM"));
 
                     loadingBar.dismiss();
+                    ballspinfadeloadergone();
 
 
                 }
