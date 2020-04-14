@@ -4,16 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="30dp"
+    android:background="@color/backgroung_colr"
     android:orientation="vertical"
-    tools:context=".activity.LoginActivity"
-    android:background="@color/backgroung_colr">
+    tools:context=".activity.LoginActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="50dp">
+        android:layout_margin="50dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/name"
@@ -27,25 +26,17 @@
             android:textColor="@color/logo_color"
             android:textSize="60dp"
             android:textStyle="italic"
-            android:transitionName="logo_text"/>
+            android:transitionName="logo_text" />
 
         <ImageView
             android:layout_width="180dp"
             android:layout_height="180dp"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="30dp"
             android:src="@drawable/cars"
-            android:transitionName="logo_image"
-            />
+            android:transitionName="logo_image" />
 
-    <!--<androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="50dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/name"
-        android:layout_gravity="center"
 
-       />-->
     </LinearLayout>
 
     <LinearLayout
@@ -53,60 +44,74 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="30dp"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/josefin_sans"
+            android:maxLines="2"
+            android:text="Login as Seller"
+            android:textColor="@color/grey_80"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:thumb="@drawable/thumb_layout1"
+            android:track="@drawable/switch_track1"
+            />
 
 
         <Button
             android:id="@+id/login_userPass"
             android:layout_width="match_parent"
             android:layout_height="66dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/btn_rounded"
             android:drawableStart="@drawable/login"
             android:fontFamily="@font/roboto"
+            android:gravity="center_vertical"
             android:padding="15dp"
             android:text="@string/username_password"
-            android:gravity="center_vertical"
             android:textAllCaps="false"
-            android:textSize="16sp"
-            android:textStyle="bold"
             android:textColor="@color/button_textclr"
-            />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/login_Google"
             android:layout_width="match_parent"
             android:layout_height="66dp"
+            android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:background="@drawable/btn_rounded"
             android:drawableStart="@drawable/googlee"
             android:fontFamily="@font/roboto"
+            android:gravity="center_vertical"
             android:padding="15dp"
             android:text="@string/google"
             android:textAllCaps="false"
-            android:gravity="center_vertical"
-            android:textSize="16sp"
-            android:textStyle="bold"
             android:textColor="@color/button_textclr"
-            android:layout_gravity="center"/>
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
 
         <Button
             android:id="@+id/login_Phone"
             android:layout_width="match_parent"
             android:layout_height="66dp"
+            android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:background="@drawable/btn_rounded"
             android:drawableStart="@drawable/phone"
             android:fontFamily="@font/roboto"
+            android:gravity="center_vertical"
             android:padding="15dp"
             android:text="@string/phone"
             android:textAllCaps="false"
-            android:textSize="16sp"
-            android:gravity="center_vertical"
-            android:textStyle="bold"
             android:textColor="@color/button_textclr"
-            android:layout_gravity="center"/>
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
 
     </LinearLayout>
 </RelativeLayout>

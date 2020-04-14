@@ -80,8 +80,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileActivity extends AppCompatActivity implements OnStatePickerListener, OnCountryPickerListener {
     private FirebaseAuth mAuth;
     private DatabaseReference rootRef;
-
     private StorageReference UserProfileImagesRef;
+
+
     private String TAG = "profile_activity";
     public static int countryID, stateID;
     private EditText pickCountry, pickStateButton, mobileEditText;
@@ -111,7 +112,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private RecyclerView categoryRecycleView;
 
     private CategoryAdapter categoryAdapter;
+
     private ProgressDialog loadingBar;
+
 
 
     private ArrayList<String> fetchedCategories = new ArrayList<>();
@@ -129,7 +132,6 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_profile);
 
 
@@ -177,6 +179,8 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
         final androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
         toolbarLayout = findViewById(R.id.toolbar_layout);
         getSupportActionBar().setTitle(" ");
 
@@ -422,7 +426,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private void takePhotoFromCamera() {
+     private void takePhotoFromCamera() {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
         } else {
@@ -475,7 +479,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
 
 
-                    final StorageReference filePath = UserProfileImagesRef.child(currentUserId + ".jpg");
+                    final StorageReference filePath = UserProfileImagesRef.child(currentUserId +".jpg");
                     filePath.putFile(contentURI).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
 
 
@@ -487,6 +491,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
                                         final String downloadUrl = task.getResult().toString();
+
                                         rootRef.child("Users").child(currentUserId).child("images")
                                                 .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override

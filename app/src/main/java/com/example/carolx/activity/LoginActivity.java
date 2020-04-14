@@ -5,10 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.carolx.R;
@@ -35,6 +38,9 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private static final String TAG = "";
     private FirebaseAuth.AuthStateListener listener;
+    private Switch aSwitch;
+    private String loginType = " ";
+    private SharedPreferences sharedPreferences;
 
 
     @Override
@@ -53,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         login_userPass = findViewById(R.id.login_userPass);
         login_gmail = findViewById(R.id.login_Google);
         login_phone = findViewById(R.id.login_Phone);
+        aSwitch = findViewById(R.id.switch1);
 
         auth = FirebaseAuth.getInstance();
 
@@ -60,6 +67,19 @@ public class LoginActivity extends AppCompatActivity {
         login_userPass.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (aSwitch.isChecked()) {
+                    loginType = "Seller";
+                    Toast.makeText(LoginActivity.this, "Logging in as Seller", Toast.LENGTH_LONG).show();
+                } else {
+                    loginType = "Buyer";
+                    Toast.makeText(LoginActivity.this, "Logging in as Buyer", Toast.LENGTH_LONG).show();
+                }
+
+                sharedPreferences = getSharedPreferences("mySharedPreference", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("LoginType", loginType);
+                editor.apply();
+
                 Intent intentLogin = new Intent(LoginActivity.this, LoginUPActivity.class);
                 startActivity(intentLogin);
 
@@ -69,6 +89,18 @@ public class LoginActivity extends AppCompatActivity {
         login_gmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (aSwitch.isChecked()) {
+                    loginType = "Seller";
+                    Toast.makeText(LoginActivity.this, "Logging in as Seller", Toast.LENGTH_LONG).show();
+                } else {
+                    loginType = "Buyer";
+                    Toast.makeText(LoginActivity.this, "Logging in as Buyer", Toast.LENGTH_LONG).show();
+                }
+                sharedPreferences = getSharedPreferences("mySharedPreference", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("LoginType", loginType);
+                editor.apply();
+
                 signIn();
 
             }
@@ -77,6 +109,19 @@ public class LoginActivity extends AppCompatActivity {
         login_phone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (aSwitch.isChecked()) {
+                    loginType = "Seller";
+                    Toast.makeText(LoginActivity.this, "Logging in as Seller", Toast.LENGTH_LONG).show();
+                } else {
+                    loginType = "Buyer";
+                    Toast.makeText(LoginActivity.this, "Logging in as Buyer", Toast.LENGTH_LONG).show();
+                }
+
+                sharedPreferences = getSharedPreferences("mySharedPreference", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("LoginType", loginType);
+                editor.apply();
+
                 Intent callIntent = new Intent(LoginActivity.this, MobileLoginActivity.class);
                 startActivity(callIntent);
 
