@@ -3,11 +3,13 @@ package com.example.carolx.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -16,10 +18,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -96,6 +96,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private CoordinatorLayout Profile_image;
     private static final int CAMERA_REQUEST = 1888, GALLERY = 1;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
+
     private CircleImageView group_photo;
     private static final String IMAGE_DIRECTORY = "/YourDirectName";
     private Switch switchButton;
@@ -114,12 +115,13 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     private CategoryAdapter categoryAdapter;
 
     private ProgressDialog loadingBar;
-
+    private String downloadUrl;
+    private Uri contentUri;
 
 
     private ArrayList<String> fetchedCategories = new ArrayList<>();
 
-//
+    //
 //    private ArrayList<String> selectedCategories;
     private TextView chooseCategoryTextView;
     private List<Integer> positionsArray;
@@ -163,7 +165,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         Parent = findViewById(R.id.Parent);
         ccp = findViewById(R.id.ccp);
         chooseCategoryTextView = findViewById(R.id.chooseCategoryTextView);
-        loadingBar = new ProgressDialog(this,R.style.MyAlertDialogStyle);
+        loadingBar = new ProgressDialog(this, R.style.MyAlertDialogStyle);
 
 
         categoryRecycleView = findViewById(R.id.categoryRecycleView);
@@ -426,9 +428,9 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-     private void takePhotoFromCamera() {
+    private void takePhotoFromCamera() {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_CAMERA_PERMISSION_CODE);
         } else {
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
             startActivityForResult(cameraIntent, CAMERA_REQUEST);
@@ -445,13 +447,14 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_CAMERA_PERMISSION_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            } else {
-                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+        if (grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                if (requestCode == MY_CAMERA_PERMISSION_CODE) {
+                    Toast.makeText(this, "All permissions granted", Toast.LENGTH_LONG).show();
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+                }
             }
         }
     }
@@ -464,103 +467,76 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             group_photo.setImageBitmap(photo);
 
+            contentUri = getImageUri(this, photo);
+            Log.d("image", contentUri.toString());
+
         } else if (requestCode == GALLERY && resultCode == Activity.RESULT_OK) {
             loadingBar.setTitle("set Profile Image");
             loadingBar.setMessage("please wait, your profile image is being uploaded");
             loadingBar.setCanceledOnTouchOutside(false);
             loadingBar.show();
             if (data != null) {
-                Uri contentURI = data.getData();
+                contentUri = data.getData();
+                Bitmap bitmap = null;
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path = saveImage(bitmap);
-                    Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
-                    group_photo.setImageBitmap(bitmap);
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentUri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // String path = saveImage(bitmap);
+                Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
+                group_photo.setImageBitmap(bitmap);
+
+            }
+        }
 
 
+        final StorageReference filePath = UserProfileImagesRef.child(currentUserId + ".jpg");
+        filePath.putFile(contentUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
 
-                    final StorageReference filePath = UserProfileImagesRef.child(currentUserId +".jpg");
-                    filePath.putFile(contentURI).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
 
-
+            @Override
+            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(ProfileActivity.this, "Profile picture updated successfully...", Toast.LENGTH_SHORT).show();
+                    filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
-                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(ProfileActivity.this, "Profile picture updated successfully...", Toast.LENGTH_SHORT).show();
-                                filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Uri> task) {
-                                        final String downloadUrl = task.getResult().toString();
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            downloadUrl = task.getResult().toString();
 
-                                        rootRef.child("Users").child(currentUserId).child("images")
-                                                .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(ProfileActivity.this, "images in database added successfully...", Toast.LENGTH_SHORT).show();
-                                                    loadingBar.dismiss();
+                            rootRef.child("Users").child(currentUserId).child("images")
+                                    .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(ProfileActivity.this, "images in database added successfully...", Toast.LENGTH_SHORT).show();
+                                        loadingBar.dismiss();
 
-                                                } else {
-                                                    String message = task.getException().toString();
-                                                    Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
-                                                    loadingBar.dismiss();
-
-                                                }
-                                            }
-                                        });
+                                    } else {
+                                        String message = task.getException().toString();
+                                        Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
+                                        loadingBar.dismiss();
 
                                     }
-                                });
-
-                            } else {
-                                String message = task.getException().toString();
-                                Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
-                                loadingBar.dismiss();
-
-                            }
+                                }
+                            });
 
                         }
                     });
 
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                } else {
+                    String message = task.getException().toString();
+                    Toast.makeText(ProfileActivity.this, "Error:" + message, Toast.LENGTH_SHORT).show();
                     loadingBar.dismiss();
+
                 }
+
             }
-
-
-        }
-    }
-
-    private String saveImage(Bitmap myBitmap) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-        File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
-        if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
-            wallpaperDirectory.mkdirs();
-        }
-
-        try {
-            File f = new File(wallpaperDirectory, Calendar.getInstance().getTimeInMillis() + ".jpg");
-            f.createNewFile();
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(bytes.toByteArray());
-            MediaScannerConnection.scanFile(this,
-                    new String[]{f.getPath()},
-                    new String[]{"image/jpeg"}, null);
-            fo.close();
-            Log.d("TAG", "File Saved::---&gt;" + f.getAbsolutePath());
-
-            return f.getAbsolutePath();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        return "";
+        });
 
 
     }
+
 
     private boolean validateMobile() {
         String val = ccp.getFullNumberWithPlus();
@@ -694,7 +670,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         profileMap.put("city", city);
         profileMap.put("pin", pin);
         profileMap.put("mode", mode);
-        Log.d(TAG, "FetchedCategores Size: "+fetchedCategories.size());
+        Log.d(TAG, "FetchedCategores Size: " + fetchedCategories.size());
         profileMap.put("selectedCategories", fetchedCategories);
         rootRef.child("Users").child(currentUserId).updateChildren(profileMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -781,7 +757,7 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
             @Override
 
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode")  && dataSnapshot.hasChild("selectedCategories") || dataSnapshot.hasChild("image"))) {
+                if ((dataSnapshot.exists()) && (dataSnapshot.hasChild("mobile") && dataSnapshot.hasChild("address1") && dataSnapshot.hasChild("address2") && dataSnapshot.hasChild("country") && dataSnapshot.hasChild("state") && dataSnapshot.hasChild("city") && dataSnapshot.hasChild("pin") && dataSnapshot.hasChild("mode") && dataSnapshot.hasChild("selectedCategories") || dataSnapshot.hasChild("image"))) {
 
                     String mobile = dataSnapshot.child("mobile").getValue().toString();
                     String address1 = dataSnapshot.child("address1").getValue().toString();
@@ -844,15 +820,30 @@ public class ProfileActivity extends AppCompatActivity implements OnStatePickerL
         finish();
     }
 
-    public void ballspinfadeloader(){
+    public void ballspinfadeloader() {
         findViewById(R.id.ballspinfadeoader).setVisibility(View.VISIBLE);
     }
 
 
-    public void ballspinfadeloadergone(){
+    public void ballspinfadeloadergone() {
         findViewById(R.id.ballspinfadeoader).setVisibility(View.GONE);
     }
 
+
+    public Uri getImageUri(Context context, Bitmap inImage) {
+        Log.d("image", inImage.toString());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        inImage.compress(Bitmap.CompressFormat.JPEG, 80, bytes);
+
+        byte[] byteArray = bytes.toByteArray();
+
+        Bitmap compressedBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), compressedBitmap, "Title", null);
+        return Uri.parse(path);
+
+
+    }
 
 
 }
